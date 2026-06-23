@@ -17,6 +17,19 @@ public class BookDAO {
 
 
     }
+    public static void createBorrowTable() throws SQLException {
+        String sql="""
+        CREATE TABLE IF NOT EXISTS borrowed_books (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER,
+            status TEXT
+        )
+    """;
+        try(Connection connection=DatabaseManager.getConnectionn();
+        Statement st=connection.createStatement()){
+            st.executeUpdate(sql);
+        }
+    }
     public static boolean addBook(Book book) throws SQLException {
         String sql="insert into books(title,author,year,genre,isbn)values (?,?,?,?,?)";
         try (
@@ -168,9 +181,50 @@ public class BookDAO {
             throw e;
         }
     }
+    public static boolean borrowBook(int bookId) throws SQLException {
+        String sql = "INSERT INTO borrowed_books(book_id, status) VALUES (?, 'borrowed')";
 
+        try (Connection connection = DatabaseManager.getConnectionn();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
 
+            ps.setInt(1, bookId);
+            int result = ps.executeUpdate();
 
+            if (result > 0) {
+                logger.info("Book borrowed successfully: " + bookId);
+                return true;
+            } else {
+                logger.warn("Borrow failed for book: " + bookId);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error while borrowing book: " + bookId, e);
+            throw e;
+        }
+    }
+    public static boolean returnBook(int bookId) throws SQLException {
+        String sql = "UPDATE borrowed_books SET status = 'returned' WHERE book_id = ? AND status = 'borrowed'";
+
+        try (Connection connection = DatabaseManager.getConnectionn();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, bookId);
+            int result = ps.executeUpdate();
+
+            if (result > 0) {
+                logger.info("Book returned successfully: " + bookId);
+                return true;
+            } else {
+                logger.warn("Return failed (maybe not borrowed): " + bookId);
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error while returning book: " + bookId, e);
+            throw e;
+        }
+    }
 
 
 }

@@ -148,6 +148,48 @@ public class LibraryUI {
 
     }
 
+    public void borrowBook() throws SQLException {
+        System.out.println("enter the book title you want to borrow");
+        String title=input.nextLine();
+        List<Book> bookList=BookDAO.searchByTitle(title);
+        if(bookList.isEmpty()) {
+            System.out.println("no book found");
+        }
+        for(int i=0;i<bookList.size();i++)
+        {
+            System.out.println(i+") "+bookList.get(i).getTitle());
+        }
+        System.out.println("choose book index");
+        int index=input.nextInt();
+        input.nextLine();
+        Book selected=bookList.get(index);
+        boolean result=BookDAO.borrowBook(selected.getId());
+        if(result)
+            System.out.println("book borrowed successfully");
+        else System.out.println("borrow failed");
+
+    }
+    public void returnBook() throws SQLException {
+        System.out.println("enter the book title to return");
+        String title=input.nextLine();
+        List<Book> bookList=BookDAO.searchByTitle(title);
+        if(bookList.isEmpty()){
+            System.out.println("no book found");
+            return;
+        }
+        for(int i=0;i<bookList.size();i++){
+            System.out.println(i+") "+bookList.get(i).getTitle());
+        }
+        System.out.println("choose book index");
+        int index=input.nextInt();
+        input.nextLine();
+        Book selected=bookList.get(index);
+        boolean result=BookDAO.returnBook(selected.getId());
+        if(result)
+            System.out.println("book returned succssfully");
+        else
+            System.out.println("returned failed");
+    }
 
 
     public void start() throws SQLException {
@@ -158,6 +200,8 @@ public class LibraryUI {
             System.out.println("3)search book");
             System.out.println("4)update book");
             System.out.println("5)delete book");
+            System.out.println("6) borrow book");
+            System.out.println("7)return book");
             System.out.println("0)exit");
             System.out.println("please choose the action you want to do by entering the number of the menu");
             int choose = input.nextInt();
@@ -186,6 +230,12 @@ public class LibraryUI {
 
                 case 5:
                    deleteBook();
+                    break;
+                case 6:
+                    borrowBook();
+                    break;
+                case 7:
+                    returnBook();
                     break;
 
                 default:
