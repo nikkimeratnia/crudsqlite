@@ -9,15 +9,45 @@ public class LibraryUI {
 
         System.out.println("title: ");
         String title = input.nextLine();
+        if (title.isBlank()) {
+            System.out.println("Title cannot be empty.");
+            return;
+        }
         System.out.println("author: ");
         String author = input.nextLine();
+        if (author.isBlank()) {
+            System.out.println("author cannot be empty.");
+            return;
+        }
         System.out.println("year: ");
-        int year = input.nextInt();
-        input.nextLine();
+        String yearTxt=input.nextLine();
+        if(yearTxt.isBlank()) {
+            System.out.println("year cannot be empty");
+            return;
+        }
+        int year;
+            try {
+                 year=Integer.parseInt(yearTxt);
+            }
+            catch (NumberFormatException e){
+                System.out.println("year must be a number .");
+                return;
+            }
+
+
+
         System.out.println("genre: ");
         String genre = input.nextLine();
+        if (genre.isBlank()) {
+            System.out.println("genre cannot be empty.");
+            return;
+        }
         System.out.println("isbn: ");
         String isbn = input.nextLine();
+        if (isbn.isBlank()) {
+            System.out.println("isbn cannot be empty.");
+            return;
+        }
         Book book = new Book(0, title, author, year, genre, isbn);
         boolean result = BookDAO.addBook(book);
         if (result)
@@ -34,6 +64,11 @@ public class LibraryUI {
             System.out.println("Year: " + book.getYear());
             System.out.println("Genre: " + book.getGenre());
             System.out.println("ISBN: " + book.getIsbn());
+            boolean borrowed=BookDAO.isBorrowed(book.getId());
+            if(borrowed)
+                System.out.println("Status: Borrowed");
+            else
+                System.out.println("Status: Available");
             System.out.println("----------------");
         }
 
@@ -41,7 +76,6 @@ public class LibraryUI {
 
 
     public void searchBook() throws SQLException {
-        input.nextLine();
         System.out.println("enter title to search");
         String title=input.nextLine();
         List<Book>bookList=BookDAO.searchByTitle(title);
@@ -68,6 +102,7 @@ public class LibraryUI {
         System.out.println("enter title of book to update:");
         String title = input.nextLine();
 
+
         List<Book> bookList = BookDAO.searchByTitle(title);
 
         if (bookList.isEmpty()) {
@@ -78,7 +113,13 @@ public class LibraryUI {
 
         for (int i = 0; i < bookList.size(); i++) {
             Book b = bookList.get(i);
-            System.out.println(i + ") " + b.getTitle() + " - " + b.getAuthor());
+            System.out.println(i + ") "
+                    + b.getTitle()
+                    + " - "
+                    + b.getAuthor()
+                    + " ("
+                    + b.getYear()
+                    + ")");
         }
 
 
@@ -95,19 +136,49 @@ public class LibraryUI {
 
         System.out.println("Enter new title:");
         String newTitle = input.nextLine();
+        if (newTitle.isBlank()) {
+            System.out.println("Title cannot be empty.");
+            return;
+        }
 
         System.out.println("Enter new author:");
         String newAuthor = input.nextLine();
+        if (newAuthor.isBlank()) {
+            System.out.println("author cannot be empty.");
+            return;
+        }
 
         System.out.println("Enter new year:");
-        int newYear = input.nextInt();
-        input.nextLine();
+        String yearTxt = input.nextLine();
+
+        if (yearTxt.isBlank()) {
+            System.out.println("Year cannot be empty.");
+            return;
+        }
+
+        int newYear;
+
+        try {
+            newYear = Integer.parseInt(yearTxt);
+        } catch (NumberFormatException e) {
+            System.out.println("Year must be a number.");
+            return;
+        }
+
 
         System.out.println("Enter new genre:");
         String newGenre = input.nextLine();
+        if (newGenre.isBlank()) {
+            System.out.println("genre cannot be empty.");
+            return;
+        }
 
         System.out.println("Enter new isbn:");
         String newIsbn = input.nextLine();
+        if (newIsbn.isBlank()) {
+            System.out.println("isbn cannot be empty.");
+            return;
+        }
 
 
         Book updatedBook = new Book(oldBook.getId(), newTitle, newAuthor, newYear, newGenre, newIsbn);
@@ -130,10 +201,18 @@ public class LibraryUI {
             return;
         }
         for (int i = 0; i < bookList.size(); i++) {
-            System.out.println(i + ") " + bookList.get(i).getTitle());
+            Book b = bookList.get(i);
+            System.out.println(i + ") "
+                    + b.getTitle()
+                    + " - "
+                    + b.getAuthor()
+                    + " ("
+                    + b.getYear()
+                    + ")");
         }
 
         int index = input.nextInt();
+        input.nextLine();
         if(index < 0 || index >= bookList.size()) {
             System.out.println("invalid index");
             return;
@@ -154,19 +233,30 @@ public class LibraryUI {
         List<Book> bookList=BookDAO.searchByTitle(title);
         if(bookList.isEmpty()) {
             System.out.println("no book found");
+            return;
         }
-        for(int i=0;i<bookList.size();i++)
-        {
-            System.out.println(i+") "+bookList.get(i).getTitle());
+        for (int i = 0; i < bookList.size(); i++) {
+            Book b = bookList.get(i);
+            System.out.println(i + ") "
+                    + b.getTitle()
+                    + " - "
+                    + b.getAuthor()
+                    + " ("
+                    + b.getYear()
+                    + ")");
         }
         System.out.println("choose book index");
         int index=input.nextInt();
         input.nextLine();
+        if(index < 0 || index >= bookList.size()) {
+            System.out.println("invalid index");
+            return;
+        }
         Book selected=bookList.get(index);
         boolean result=BookDAO.borrowBook(selected.getId());
         if(result)
             System.out.println("book borrowed successfully");
-        else System.out.println("borrow failed");
+        else System.out.println("this book is already borrowed");
 
     }
     public void returnBook() throws SQLException {
@@ -177,18 +267,33 @@ public class LibraryUI {
             System.out.println("no book found");
             return;
         }
-        for(int i=0;i<bookList.size();i++){
-            System.out.println(i+") "+bookList.get(i).getTitle());
+        for (int i = 0; i < bookList.size(); i++) {
+            Book b = bookList.get(i);
+            System.out.println(i + ") "
+                    + b.getTitle()
+                    + " - "
+                    + b.getAuthor()
+                    + " ("
+                    + b.getYear()
+                    + ")");
         }
         System.out.println("choose book index");
         int index=input.nextInt();
         input.nextLine();
+        if(index < 0 || index >= bookList.size()) {
+            System.out.println("invalid index");
+            return;
+        }
         Book selected=bookList.get(index);
+        if(!BookDAO.isBorrowed(selected.getId())){
+            System.out.println("this book is currently borrowed");
+            return;
+        }
         boolean result=BookDAO.returnBook(selected.getId());
         if(result)
-            System.out.println("book returned succssfully");
+            System.out.println("book returned successfully");
         else
-            System.out.println("returned failed");
+            System.out.println("this book is not currently borrowed");
     }
 
 
@@ -200,11 +305,12 @@ public class LibraryUI {
             System.out.println("3)search book");
             System.out.println("4)update book");
             System.out.println("5)delete book");
-            System.out.println("6) borrow book");
+            System.out.println("6)borrow book");
             System.out.println("7)return book");
             System.out.println("0)exit");
             System.out.println("please choose the action you want to do by entering the number of the menu");
             int choose = input.nextInt();
+            input.nextLine();
 
             System.out.println("you choose: " + choose);
             if (choose == 0) {

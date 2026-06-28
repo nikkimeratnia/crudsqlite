@@ -4,6 +4,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.transform.Result;
+
 public class BookDAO {
     private  static final Logger logger=LoggerFactory.getLogger(BookDAO.class);
     public static void createTable() throws SQLException {
@@ -22,12 +24,26 @@ public class BookDAO {
         CREATE TABLE IF NOT EXISTS borrowed_books (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             book_id INTEGER,
-            status TEXT
+            status TEXT not null,
+            foreign key(book_id) references books(id)
         )
     """;
         try(Connection connection=DatabaseManager.getConnectionn();
         Statement st=connection.createStatement()){
             st.executeUpdate(sql);
+        }
+    }
+
+
+
+    public static boolean isBorrowed(int bookId) throws SQLException {
+        String sql="Select * from borrowed_books where book_id=? and status='borrowed'";
+        try (Connection connection=DatabaseManager.getConnectionn();
+             PreparedStatement ps=connection.prepareStatement(sql);
+        ){
+            ps.setInt(1,bookId);
+            ResultSet rs= ps.executeQuery();
+            return rs.next();
         }
     }
     public static boolean addBook(Book book) throws SQLException {
@@ -182,6 +198,10 @@ public class BookDAO {
         }
     }
     public static boolean borrowBook(int bookId) throws SQLException {
+        if(isBorrowed(bookId)){
+            logger.warn("Book is already borrowed: "+bookId);
+            return false;
+        }
         String sql = "INSERT INTO borrowed_books(book_id, status) VALUES (?, 'borrowed')";
 
         try (Connection connection = DatabaseManager.getConnectionn();
