@@ -26,7 +26,7 @@ All information is stored in a SQLite database using JDBC.
 
 ## Database
 The project uses two tables:
-## books
+1)books
 stores all books information
 Fields:
 1)id
@@ -35,7 +35,7 @@ Fields:
 4)year
 5)genre
 6)isbn
-## borrowed_books
+2)borrowed_books
 Stores borrowing records.
 Fields:
 1)id
